@@ -4,122 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Controle de Plantões - Larissa</title>
-    <style>
-        :root {
-            --primary: #2563eb;
-            --secondary: #64748b;
-            --success: #16a34a;
-            --bg: #f1f5f9;
-            --card: #ffffff;
-            --text: #1e293b;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            margin: 0;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        h1 { text-align: center; color: var(--primary); font-size: 1.5rem; }
-        
-        .card {
-            background: var(--card);
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
-
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.9rem; }
-        
-        input[type="date"], select, input[type="number"] {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            box-sizing: border-box;
-            font-size: 1rem;
-        }
-
-        .checkbox-group {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .checkbox-group input { width: auto; }
-
-        button {
-            width: 100%;
-            padding: 12px;
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 1rem;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background 0.2s;
-        }
-        button:hover { background-color: #1d4ed8; }
-        
-        button.delete-btn {
-            background-color: #ef4444;
-            padding: 5px 10px;
-            font-size: 0.8rem;
-            width: auto;
-            margin-left: 10px;
-        }
-
-        .summary {
-            text-align: center;
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: var(--success);
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.9rem;
-        }
-        
-        th, td {
-            text-align: left;
-            padding: 12px;
-            border-bottom: 1px solid #e2e8f0;
-        }
-        
-        th { background-color: #f8fafc; color: var(--secondary); }
-        
-        .settings-toggle {
-            text-align: center;
-            margin-bottom: 10px;
-            font-size: 0.9rem;
-            color: var(--secondary);
-            cursor: pointer;
-            text-decoration: underline;
-        }
-        
-        #settingsArea { display: none; }
-        
-        .badge {
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            font-weight: bold;
-        }
-        .badge-diurno { background-color: #dbeafe; color: #1e40af; }
-        .badge-noturno { background-color: #e0e7ff; color: #3730a3; }
-
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
@@ -130,10 +15,21 @@
     
     <div id="settingsArea" class="card">
         <div class="form-group">
-            <label>Valor da Hora Base (R$)</label>
+            <label style="display:flex; align-items:center;">
+                Valor da Hora Base (R$)
+                <span class="info-icon" 
+                      onclick="alert(this.getAttribute('data-tooltip'))"
+                      data-tooltip="CÁLCULO DO VALOR HORA:&#10;1. Pegue o valor total dos plantões normais no holerite.&#10;2. Divida pela quantidade de plantões feitos.&#10;3. Divida o resultado por 12 (horas).&#10;&#10;EXEMPLO (Larissa):&#10;R$ 3.046,72 ÷ 16 plantões = R$ 190,42 por plantão.&#10;R$ 190,42 ÷ 12 horas = R$ 15,87 a hora.">
+                    ?
+                </span>
+            </label>
             <input type="number" id="valorHora" step="0.01" value="15.87">
+            <small style="color: var(--secondary); display:block; margin-top:5px;">
+                *Este valor é multiplicado pelos pesos (50%, 75%, etc) automaticamente.
+            </small>
         </div>
-        <div class="form-group">
+
+        <div class="form-group" style="margin-top: 20px; border-top: 1px solid #e2e8f0; padding-top: 15px;">
             <label>Cadastrar Feriado (Data)</label>
             <div style="display:flex; gap:10px;">
                 <input type="date" id="newFeriado">
@@ -191,196 +87,7 @@
     </div>
 </div>
 
-<script>
-    // --- ESTADO INICIAL ---
-    // Carrega dados do LocalStorage ou inicia vazio
-    let plantoes = JSON.parse(localStorage.getItem('plantoes_larissa')) || [];
-    let feriados = JSON.parse(localStorage.getItem('feriados_larissa')) || [
-        "2026-01-01", "2026-02-17", "2026-04-03", "2026-04-21", 
-        "2026-05-01", "2026-06-04", "2026-09-07", "2026-10-12", 
-        "2026-11-02", "2026-11-15", "2026-12-08", "2026-12-25"
-    ]; // Alguns feriados padrão para 2026
-    
-    // Carrega valor hora salvo ou usa o padrão
-    const savedValorHora = localStorage.getItem('valor_hora_larissa');
-    if(savedValorHora) document.getElementById('valorHora').value = savedValorHora;
-
-    // Define data de hoje no input
-    document.getElementById('dataPlantao').valueAsDate = new Date();
-
-    // --- LÓGICA DE NEGÓCIO ---
-
-    function getValorHora() {
-        return parseFloat(document.getElementById('valorHora').value) || 15.87;
-    }
-
-    function isFeriado(dataString) {
-        return feriados.includes(dataString);
-    }
-
-    function calcularValor(dataString, turno, isVespera) {
-        // Criando data corrigindo fuso horário (adicionando T12:00) para garantir o dia correto
-        const dataObj = new Date(dataString + 'T12:00:00'); 
-        const diaSemana = dataObj.getDay(); // 0 = Domingo, 6 = Sábado
-        const ehFeriado = isFeriado(dataString);
-        const valorHora = getValorHora();
-        
-        let fator = 0;
-        let descricao = "";
-
-        // LÓGICA IDÊNTICA AO EXCEL
-        if (turno === "Diurno") {
-            if (diaSemana === 0 || ehFeriado) {
-                // Domingo ou Feriado
-                fator = 12 * 2.0; 
-                descricao = "Dom/Fer (100%)";
-            } else {
-                // Seg a Sab
-                fator = 12 * 1.5;
-                descricao = "Normal (50%)";
-            }
-        } 
-        else if (turno === "Noturno") {
-            if (diaSemana === 0 || ehFeriado) {
-                // Domingo ou Feriado (Prioridade máxima)
-                // 3h(100%) + 2h(125%) + 5h(75%) + 2h(50%)
-                fator = (3*2.0) + (2*2.25) + (5*1.75) + (2*1.5);
-                descricao = "Not. Dom/Fer";
-            } else if (diaSemana === 6 || isVespera) {
-                // Sábado ou Véspera
-                // 3h(50%) + 2h(75%) + 5h(125%) + 2h(100%)
-                fator = (3*1.5) + (2*1.75) + (5*2.25) + (2*2.0);
-                descricao = "Not. Sáb/Vésp";
-            } else {
-                // Noturno Comum (Seg-Sex)
-                // 5h(50%) + 7h(75%)
-                fator = (5*1.5) + (7*1.75);
-                descricao = "Not. Comum";
-            }
-        }
-
-        return {
-            total: fator * valorHora,
-            desc: descricao
-        };
-    }
-
-    // --- INTERAÇÃO COM A UI ---
-
-    function adicionarPlantao() {
-        const data = document.getElementById('dataPlantao').value;
-        const turno = document.getElementById('turno').value;
-        const vespera = document.getElementById('vespera').checked;
-
-        if (!data) { alert("Selecione uma data"); return; }
-
-        const calculo = calcularValor(data, turno, vespera);
-
-        const novoPlantao = {
-            id: Date.now(),
-            data: data,
-            turno: turno,
-            vespera: vespera,
-            valor: calculo.total,
-            desc: calculo.desc
-        };
-
-        plantoes.push(novoPlantao);
-        salvarDados();
-        renderizarTabela();
-    }
-
-    function removerPlantao(id) {
-        if(confirm("Remover este plantão?")) {
-            plantoes = plantoes.filter(p => p.id !== id);
-            salvarDados();
-            renderizarTabela();
-        }
-    }
-
-    function limparHistorico() {
-        if(confirm("Tem certeza que deseja apagar todo o histórico?")) {
-            plantoes = [];
-            salvarDados();
-            renderizarTabela();
-        }
-    }
-
-    function salvarDados() {
-        localStorage.setItem('plantoes_larissa', JSON.stringify(plantoes));
-        localStorage.setItem('valor_hora_larissa', document.getElementById('valorHora').value);
-        renderizarResumo();
-    }
-
-    function formatarMoeda(valor) {
-        return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-    }
-
-    function formatarData(dataString) {
-        const partes = dataString.split('-');
-        return `${partes[2]}/${partes[1]}/${partes[0]}`; // DD/MM/AAAA
-    }
-
-    function renderizarTabela() {
-        const tbody = document.querySelector("#tabelaPlantoes tbody");
-        tbody.innerHTML = "";
-
-        // Ordenar por data (mais recente primeiro)
-        const plantoesOrdenados = [...plantoes].sort((a, b) => new Date(b.data) - new Date(a.data));
-
-        plantoesOrdenados.forEach(p => {
-            const tr = document.createElement("tr");
-            const badgeClass = p.turno === 'Diurno' ? 'badge-diurno' : 'badge-noturno';
-            
-            tr.innerHTML = `
-                <td>
-                    <strong>${formatarData(p.data)}</strong><br>
-                    <span class="badge ${badgeClass}">${p.turno}</span>
-                </td>
-                <td>
-                    <small>${p.desc}</small><br>
-                    ${p.vespera ? '<small style="color:#f59e0b">★ Véspera</small>' : ''}
-                </td>
-                <td style="color: var(--success); font-weight:bold;">${formatarMoeda(p.valor)}</td>
-                <td><button class="delete-btn" onclick="removerPlantao(${p.id})">X</button></td>
-            `;
-            tbody.appendChild(tr);
-        });
-        renderizarResumo();
-    }
-
-    function renderizarResumo() {
-        const total = plantoes.reduce((acc, curr) => acc + curr.valor, 0);
-        document.getElementById("valorTotal").innerText = formatarMoeda(total);
-    }
-
-    // --- GERENCIAMENTO DE FERIADOS ---
-
-    function toggleSettings() {
-        const area = document.getElementById("settingsArea");
-        area.style.display = area.style.display === "block" ? "none" : "block";
-        renderizarListaFeriados();
-    }
-
-    function addFeriado() {
-        const data = document.getElementById("newFeriado").value;
-        if(data && !feriados.includes(data)) {
-            feriados.push(data);
-            localStorage.setItem('feriados_larissa', JSON.stringify(feriados));
-            renderizarListaFeriados();
-            alert("Feriado adicionado! (Recalculando plantões antigos automaticamente apenas se você editar o valor hora ou adicionar novos. Para atualizar passados, teria que reprocessar, mas para novos funcionará ok)");
-        }
-    }
-
-    function renderizarListaFeriados() {
-        const lista = document.getElementById("listaFeriados");
-        lista.innerHTML = "<strong>Feriados Cadastrados:</strong> " + feriados.map(f => formatarData(f)).join(", ");
-    }
-
-    // Inicialização
-    renderizarTabela();
-
-</script>
+<script src="script.js"></script>
 
 </body>
 </html>
