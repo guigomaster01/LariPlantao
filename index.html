@@ -1,93 +1,13 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Controle de Plantões</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-
-<div class="container">
-    <h1>🏥 Plantões</h1>
-
-    <div class="settings-toggle" onclick="toggleSettings()">⚙️ Gerenciar Feriados e Valor Hora</div>
-    
-    <div id="settingsArea" class="card">
-        <div class="form-group">
-            <label style="display:flex; align-items:center;">
-                Valor da Hora Base (R$)
-                <span class="info-icon" 
-                      onclick="alert(this.getAttribute('data-tooltip'))"
-                      data-tooltip="CÁLCULO DO VALOR HORA:&#10;1. Pegue o valor total dos plantões normais no holerite.&#10;2. Divida pela quantidade de plantões feitos.&#10;3. Divida o resultado por 12 (horas).&#10;&#10;EXEMPLO:&#10;R$ 3.046,72 ÷ 16 plantões = R$ 190,42 por plantão.&#10;R$ 190,42 ÷ 12 horas = R$ 15,87 a hora.">
-                    ?
-                </span>
-            </label>
-            <input type="number" id="valorHora" step="0.01" value="15.87">
-            <small style="color: var(--secondary); display:block; margin-top:5px;">
-                *Este valor é multiplicado pelos pesos (50%, 75%, etc) automaticamente.
-            </small>
-        </div>
-
-        <div class="form-group" style="margin-top: 20px; border-top: 1px solid #e2e8f0; padding-top: 15px;">
-            <label>Cadastrar Feriado (Data)</label>
-            <div style="display:flex; gap:10px;">
-                <input type="date" id="newFeriado">
-                <button onclick="addFeriado()" style="width: auto;">+</button>
-            </div>
-        </div>
-        <div id="listaFeriados" style="font-size: 0.85rem; margin-top: 10px; color: var(--secondary);"></div>
-    </div>
-
-    <div class="card">
-        <div class="form-group">
-            <label for="dataPlantao">Data do Plantão</label>
-            <input type="date" id="dataPlantao">
-        </div>
-
-        <div class="form-group">
-            <label for="turno">Turno</label>
-            <select id="turno">
-                <option value="Diurno">Diurno (07h - 19h)</option>
-                <option value="Noturno">Noturno (19h - 07h)</option>
-            </select>
-        </div>
-
-        <div class="form-group checkbox-group">
-            <input type="checkbox" id="vespera">
-            <label for="vespera" style="margin:0; cursor:pointer;">É Véspera de Feriado?</label>
-        </div>
-
-        <button onclick="adicionarPlantao()">Adicionar Plantão</button>
-    </div>
-
-    <div class="card">
-        <div class="summary">
-            Total Estimado: <span id="valorTotal">R$ 0,00</span>
-        </div>
-    </div>
-
-    <div class="card">
-        <h3>Histórico</h3>
-        <table id="tabelaPlantoes">
-            <thead>
-                <tr>
-                    <th>Data</th>
-                    <th>Detalhes</th>
-                    <th>Valor</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                </tbody>
-        </table>
-        <div style="margin-top: 15px; text-align: center;">
-            <button onclick="limparHistorico()" style="background-color: var(--secondary); width: auto; font-size: 0.8rem;">Limpar Tudo</button>
-        </div>
-    </div>
-</div>
-
-<script src="script.js"></script>
-
-</body>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>lari-plantao</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>
