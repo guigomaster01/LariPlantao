@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface Plantao {
   id: number;
@@ -126,108 +127,148 @@ export const Home: React.FC = () => {
   const total = plantoes.reduce((acc, curr) => acc + curr.valor, 0);
   const plantoesOrdenados = [...plantoes].sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()).reverse();
 
+  // Reusable glass class
+  const glassCardClass = "bg-white/60 dark:bg-slate-900/60 backdrop-blur-2xl border border-white/50 dark:border-slate-700/50 shadow-xl shadow-slate-200/40 dark:shadow-slate-900/40 rounded-3xl p-6 transition-colors duration-500";
+  const inputClass = "w-full p-3 border border-slate-200/60 dark:border-slate-700/60 rounded-xl bg-white/50 dark:bg-slate-800/50 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all";
+
   return (
-    <div className="max-w-xl mx-auto space-y-6">
-      <div className="text-center cursor-pointer text-secondary dark:text-slate-400 underline text-sm hover:text-primary dark:hover:text-blue-300 transition-colors" onClick={() => setShowSettings(!showSettings)}>
-        ⚙️ Gerenciar Feriados e Valor Hora
+    <motion.div 
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
+      className="max-w-xl mx-auto space-y-6"
+    >
+      <div className="text-center cursor-pointer text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-blue-400 transition-colors font-medium" onClick={() => setShowSettings(!showSettings)}>
+        {showSettings ? 'Fechar Configurações ⌃' : '⚙️ Gerenciar Feriados e Valor Hora'}
       </div>
 
-      {showSettings && (
-        <div className="bg-white dark:bg-slate-800 p-5 rounded-xl shadow-md border border-slate-100 dark:border-slate-700 transition-colors">
-          <div className="mb-4">
-            <label className="block text-sm font-semibold mb-2 dark:text-slate-200">Valor da Hora Base (R$)</label>
-            <input 
-              type="number" step="0.01" 
-              value={valorHora} 
-              onChange={e => setValorHora(parseFloat(e.target.value) || 0)}
-              className="w-full p-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 dark:text-white"
-            />
-          </div>
-          <div className="border-t border-slate-200 dark:border-slate-600 pt-4">
-            <label className="block text-sm font-semibold mb-2 dark:text-slate-200">Cadastrar Feriado (Data)</label>
-            <div className="flex gap-2">
-              <input 
-                type="date" 
-                value={newFeriado} 
-                onChange={e => setNewFeriado(e.target.value)}
-                className="flex-1 p-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 dark:text-white"
-              />
-              <button onClick={addFeriado} className="px-4 bg-primary text-white font-bold rounded-md hover:bg-blue-700 transition-colors">+</button>
+      <AnimatePresence>
+        {showSettings && (
+          <motion.div 
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="overflow-hidden"
+          >
+            <div className={glassCardClass}>
+              <div className="mb-4">
+                <label className="block text-sm font-semibold mb-2 dark:text-slate-200">Valor da Hora Base (R$)</label>
+                <input 
+                  type="number" step="0.01" 
+                  value={valorHora} 
+                  onChange={e => setValorHora(parseFloat(e.target.value) || 0)}
+                  className={inputClass}
+                />
+              </div>
+              <div className="border-t border-slate-200/50 dark:border-slate-700/50 pt-4">
+                <label className="block text-sm font-semibold mb-2 dark:text-slate-200">Cadastrar Feriado (Data)</label>
+                <div className="flex gap-2">
+                  <input 
+                    type="date" 
+                    value={newFeriado} 
+                    onChange={e => setNewFeriado(e.target.value)}
+                    className={inputClass}
+                  />
+                  <button onClick={addFeriado} className="px-5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl transition-all shadow-md active:scale-95">+</button>
+                </div>
+                <div className="text-xs text-slate-500 dark:text-slate-400 mt-3 leading-relaxed">
+                  <strong>Feriados Cadastrados:</strong> {feriados.map(f => formatarData(f)).join(", ")}
+                </div>
+              </div>
             </div>
-            <div className="text-xs text-secondary dark:text-slate-400 mt-2">
-              <strong>Feriados:</strong> {feriados.map(f => formatarData(f)).join(", ")}
-            </div>
-          </div>
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      <div className="bg-white dark:bg-slate-800 p-5 rounded-xl shadow-md border border-slate-100 dark:border-slate-700 space-y-4 transition-colors">
+      <div className={`${glassCardClass} space-y-4`}>
         <div>
           <label className="block text-sm font-semibold mb-1 dark:text-slate-200">Data do Plantão</label>
-          <input type="date" value={dataPlantao} onChange={e => setDataPlantao(e.target.value)} className="w-full p-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 dark:text-white" />
+          <input type="date" value={dataPlantao} onChange={e => setDataPlantao(e.target.value)} className={inputClass} />
         </div>
         <div>
           <label className="block text-sm font-semibold mb-1 dark:text-slate-200">Turno</label>
-          <select value={turno} onChange={e => setTurno(e.target.value)} className="w-full p-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 dark:text-white">
+          <select value={turno} onChange={e => setTurno(e.target.value)} className={inputClass}>
             <option value="Diurno">Diurno (07h - 19h)</option>
             <option value="Noturno">Noturno (19h - 07h)</option>
           </select>
         </div>
-        <div className="flex items-center gap-2">
-          <input type="checkbox" id="vespera" checked={vespera} onChange={e => setVespera(e.target.checked)} className="w-4 h-4" />
-          <label htmlFor="vespera" className="text-sm font-semibold cursor-pointer dark:text-slate-200">É Véspera de Feriado?</label>
+        <div className="flex items-center gap-3 mt-2">
+          <input type="checkbox" id="vespera" checked={vespera} onChange={e => setVespera(e.target.checked)} className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary/50" />
+          <label htmlFor="vespera" className="text-sm font-medium cursor-pointer dark:text-slate-200">É Véspera de Feriado?</label>
         </div>
-        <button onClick={adicionarPlantao} className="w-full py-3 bg-primary text-white font-bold rounded-md hover:bg-blue-700 transition-colors mt-2">
+        <button onClick={adicionarPlantao} className="w-full py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl transition-all shadow-lg hover:shadow-indigo-500/25 active:scale-[0.98] mt-4">
           Adicionar Plantão
         </button>
       </div>
 
-      <div className="bg-white dark:bg-slate-800 p-5 rounded-xl shadow-md border border-slate-100 dark:border-slate-700 text-center transition-colors">
-        <div className="text-lg font-bold text-success dark:text-green-400">
-          Total Estimado: {formatarMoeda(total)}
+      <motion.div 
+        layout
+        className={`${glassCardClass} text-center relative overflow-hidden`}
+      >
+        <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 dark:from-emerald-500/5 dark:to-teal-500/5" />
+        <div className="relative text-xl font-bold text-success dark:text-emerald-400">
+          Total Estimado: <span className="text-2xl">{formatarMoeda(total)}</span>
         </div>
-      </div>
+      </motion.div>
 
-      <div className="bg-white dark:bg-slate-800 p-5 rounded-xl shadow-md border border-slate-100 dark:border-slate-700 transition-colors">
-        <h3 className="text-lg font-bold mb-4 text-center dark:text-white">Histórico</h3>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left dark:text-slate-300">
-            <thead>
-              <tr className="border-b dark:border-slate-700 bg-slate-50 dark:bg-slate-700/50 text-secondary dark:text-slate-400">
-                <th className="p-3 font-semibold">Data</th>
-                <th className="p-3 font-semibold">Detalhes</th>
-                <th className="p-3 font-semibold">Valor</th>
-                <th className="p-3"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {plantoesOrdenados.map(p => (
-                <tr key={p.id} className="border-b dark:border-slate-700">
-                  <td className="p-3">
-                    <strong className="dark:text-white">{formatarData(p.data)}</strong><br/>
-                    <span className={`text-xs px-2 py-1 rounded-full font-bold ${p.turno === 'Diurno' ? 'bg-blue-100 text-blue-800' : 'bg-indigo-100 text-indigo-800'}`}>
-                      {p.turno}
-                    </span>
-                  </td>
-                  <td className="p-3">
-                    <span className="text-xs">{p.desc}</span><br/>
-                    {p.vespera && <span className="text-xs text-amber-500">★ Véspera</span>}
-                  </td>
-                  <td className="p-3 text-success dark:text-green-400 font-bold">{formatarMoeda(p.valor)}</td>
-                  <td className="p-3">
-                    <button onClick={() => removerPlantao(p.id)} className="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600 transition-colors">X</button>
-                  </td>
+      <div className={glassCardClass}>
+        <h3 className="text-lg font-bold mb-4 text-center dark:text-white">Histórico de Plantões</h3>
+        
+        {plantoes.length === 0 ? (
+          <p className="text-center text-slate-500 dark:text-slate-400 py-4 text-sm">Nenhum plantão registrado ainda.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-left dark:text-slate-300 border-collapse">
+              <thead>
+                <tr className="border-b border-slate-200/50 dark:border-slate-700/50 text-slate-500 dark:text-slate-400">
+                  <th className="pb-3 px-2 font-semibold">Data</th>
+                  <th className="pb-3 px-2 font-semibold">Detalhes</th>
+                  <th className="pb-3 px-2 font-semibold">Valor</th>
+                  <th className="pb-3 px-2"></th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                <AnimatePresence>
+                  {plantoesOrdenados.map(p => (
+                    <motion.tr 
+                      key={p.id} 
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 10 }}
+                      className="border-b border-slate-200/50 dark:border-slate-700/50 group hover:bg-white/40 dark:hover:bg-slate-800/40 transition-colors"
+                    >
+                      <td className="py-3 px-2">
+                        <strong className="dark:text-white block">{formatarData(p.data)}</strong>
+                        <span className={`inline-block mt-1 text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full font-bold ${p.turno === 'Diurno' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300' : 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300'}`}>
+                          {p.turno}
+                        </span>
+                      </td>
+                      <td className="py-3 px-2">
+                        <span className="text-xs font-medium text-slate-600 dark:text-slate-300">{p.desc}</span><br/>
+                        {p.vespera && <span className="text-[10px] font-bold uppercase tracking-widest text-amber-500 mt-1 block">★ Véspera</span>}
+                      </td>
+                      <td className="py-3 px-2 text-success dark:text-emerald-400 font-bold">{formatarMoeda(p.valor)}</td>
+                      <td className="py-3 px-2 text-right">
+                        <button onClick={() => removerPlantao(p.id)} className="text-slate-400 hover:text-red-500 p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors">
+                          ✕
+                        </button>
+                      </td>
+                    </motion.tr>
+                  ))}
+                </AnimatePresence>
+              </tbody>
+            </table>
+          </div>
+        )}
+        
         {plantoes.length > 0 && (
-          <div className="mt-4 text-center">
-            <button onClick={limparHistorico} className="bg-secondary dark:bg-slate-600 text-white px-4 py-2 rounded text-xs hover:bg-slate-600 dark:hover:bg-slate-500 transition-colors">Limpar Tudo</button>
+          <div className="mt-6 text-center">
+            <button onClick={limparHistorico} className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 text-xs font-semibold uppercase tracking-wider hover:underline transition-colors">
+              Limpar Todo o Histórico
+            </button>
           </div>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 };

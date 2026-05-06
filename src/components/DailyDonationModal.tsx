@@ -22,26 +22,25 @@ function DonateView({ onCopy, copied }: { onCopy: () => void, copied: boolean })
 
         <div className="bg-slate-950/50 border border-slate-800 p-6 rounded-3xl mt-6 relative overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-1 bg-emerald-500" />
-          
+
           <div className="text-[10px] uppercase font-bold text-slate-500 tracking-widest mb-3 flex items-center justify-between">
             <span>Chave PIX (E-mail)</span>
             <span className="text-emerald-500 font-black">Apoio Direto</span>
           </div>
-          
+
           <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex items-center justify-between gap-4">
             <span className="font-mono text-xs text-slate-200 break-all select-all">contatorodrigorodrigues@gmail.com</span>
-            <button 
+            <button
               onClick={onCopy}
-              className={`flex-shrink-0 p-2.5 rounded-lg transition-all ${
-                copied ? 'bg-emerald-500 text-white' : 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-900/20'
-              }`}
+              className={`flex-shrink-0 p-2.5 rounded-lg transition-all ${copied ? 'bg-emerald-500 text-white' : 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-900/20'
+                }`}
             >
               {copied ? <Check size={18} /> : <Copy size={18} />}
             </button>
           </div>
-          
+
           {copied && (
-            <motion.p 
+            <motion.p
               initial={{ opacity: 0, y: 5 }}
               animate={{ opacity: 1, y: 0 }}
               className="text-emerald-400 text-[10px] font-bold text-center mt-3 uppercase tracking-widest"
@@ -71,7 +70,7 @@ export function DailyDonationModal() {
       const timer = setTimeout(() => {
         setIsOpen(true);
         localStorage.setItem('lastDonationPromptDate', today);
-      }, 3000); // Mostra o popup após 3 segundos
+      }, 6000); // Mostra o popup após 6erni segundos
       return () => clearTimeout(timer);
     }
   }, []);
@@ -86,7 +85,7 @@ export function DailyDonationModal() {
     <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -99,7 +98,7 @@ export function DailyDonationModal() {
             exit={{ scale: 0.9, opacity: 0, y: 20 }}
             className="relative w-full max-w-md bg-slate-900/90 backdrop-blur-2xl border border-slate-700/50 rounded-[2rem] p-6 shadow-2xl shadow-emerald-900/10"
           >
-            <button 
+            <button
               onClick={() => setIsOpen(false)}
               className="absolute top-5 right-5 text-slate-500 hover:text-white transition-colors bg-slate-800/50 hover:bg-slate-700 rounded-full p-1"
             >
