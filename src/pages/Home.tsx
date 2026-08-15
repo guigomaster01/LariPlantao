@@ -30,6 +30,32 @@ export const Home: React.FC = () => {
     return saved ? parseFloat(saved) : 15.87;
   });
 
+  const [valorHoraInput, setValorHoraInput] = useState<string>(() => {
+    const saved = localStorage.getItem('valor_hora_larissa');
+    if (saved) {
+      const num = parseFloat(saved);
+      return isNaN(num) ? '15,87' : num.toString().replace('.', ',');
+    }
+    return '15,87';
+  });
+
+  const handleValorHoraChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    if (/^\d*[,.]?\d*$/.test(val)) {
+      setValorHoraInput(val);
+      const normalized = val.replace(',', '.');
+      const parsed = parseFloat(normalized);
+      setValorHora(isNaN(parsed) ? 0 : parsed);
+    }
+  };
+
+  const handleValorHoraBlur = () => {
+    if (!valorHoraInput.trim() || valorHoraInput === ',' || valorHoraInput === '.') {
+      setValorHoraInput('0');
+      setValorHora(0);
+    }
+  };
+
   const [dataPlantao, setDataPlantao] = useState(new Date().toISOString().split('T')[0]);
   const [turno, setTurno] = useState('Diurno');
   const [vespera, setVespera] = useState(false);
@@ -154,9 +180,12 @@ export const Home: React.FC = () => {
               <div className="mb-4">
                 <label className="block text-sm font-semibold mb-2 dark:text-slate-200">Valor da Hora Base (R$)</label>
                 <input 
-                  type="number" step="0.01" 
-                  value={valorHora} 
-                  onChange={e => setValorHora(parseFloat(e.target.value) || 0)}
+                  type="text"
+                  inputMode="decimal"
+                  value={valorHoraInput} 
+                  onChange={handleValorHoraChange}
+                  onBlur={handleValorHoraBlur}
+                  placeholder="0,00"
                   className={inputClass}
                 />
               </div>
